@@ -354,7 +354,7 @@ bool AP_Compass_AK09916::_check_id()
 }
 
 bool AP_Compass_AK09916::_setup_mode() {
-    return _bus->register_write(REG_CNTL2, 0x08, true); //Continuous Mode 2
+    return _bus->register_write(REG_CNTL2, 0x04, true); //Continuous Mode 1 (10 Hz) — 100 Hz overkill for a slow rover + causes I2C clock-stretch timeouts
 }
 
 bool AP_Compass_AK09916::_reset()

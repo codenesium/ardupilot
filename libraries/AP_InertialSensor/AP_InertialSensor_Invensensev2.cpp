@@ -153,6 +153,8 @@ void AP_InertialSensor_Invensensev2::_fifo_reset()
                     BIT_ZG_FIFO_EN | BIT_ACCEL_FIFO_EN | BIT_TEMP_FIFO_EN, true);
     hal.scheduler->delay_microseconds(1);
     _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
+    /* Enable I2C bypass so a directly-probed compass (AK09916 @ 0x0C) appears on the main bus while the aux master is disabled. */
+    _register_write(INV2REG_INT_PIN_CFG, BIT_BYPASS_EN);
     _last_stat_user_ctrl = user_ctrl | BIT_USER_CTRL_FIFO_EN;
 
     notify_accel_fifo_reset(accel_instance);
@@ -236,6 +238,8 @@ void AP_InertialSensor_Invensensev2::start()
 
     // now that we have initialised, we set the bus speed to high
     _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
+    /* Enable I2C bypass so a directly-probed compass (AK09916 @ 0x0C) appears on the main bus while the aux master is disabled. */
+    _register_write(INV2REG_INT_PIN_CFG, BIT_BYPASS_EN);
 
     // setup sensor rotations from probe()
     set_gyro_orientation(gyro_instance, _rotation);
@@ -546,6 +550,8 @@ check_registers:
         _inc_accel_error_count(accel_instance);
     }
     _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
+    /* Enable I2C bypass so a directly-probed compass (AK09916 @ 0x0C) appears on the main bus while the aux master is disabled. */
+    _register_write(INV2REG_INT_PIN_CFG, BIT_BYPASS_EN);
 }
 
 /*
@@ -709,6 +715,7 @@ bool AP_InertialSensor_Invensensev2::_hardware_init(void)
             hal.scheduler->delay(10);
         }
 
+
         /* reset device */
         _register_write(INV2REG_PWR_MGMT_1, BIT_PWR_MGMT_1_DEVICE_RESET);
         hal.scheduler->delay(100);
@@ -739,6 +746,8 @@ bool AP_InertialSensor_Invensensev2::_hardware_init(void)
     }
 
     _dev->set_speed(AP_HAL::Device::SPEED_HIGH);
+    /* Enable I2C bypass so a directly-probed compass (AK09916 @ 0x0C) appears on the main bus while the aux master is disabled. */
+    _register_write(INV2REG_INT_PIN_CFG, BIT_BYPASS_EN);
 
     if (tries == 5) {
         DEV_PRINTF("Failed to boot Invensense 5 times\n");

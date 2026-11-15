@@ -24,7 +24,7 @@
 
 extern const AP_HAL::HAL& hal;
 
-#define PROXIMITY_MAV_TIMEOUT_MS    500 // distance messages must arrive within this many milliseconds
+#define PROXIMITY_MAV_TIMEOUT_MS    3000 // distance messages must arrive within this many milliseconds
 #define PROXIMITY_TIMESTAMP_MSG_TIMEOUT_MS  50  // obstacles will be transferred from temp boundary to actual boundary if mavlink message does not arrive within this many milliseconds
 
 // update the state of the sensor

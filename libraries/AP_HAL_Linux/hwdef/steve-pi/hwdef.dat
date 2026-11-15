@@ -1,0 +1,38 @@
+# STEVE Pi — ArduPilot with an ICM-20948 IMU on I2C6. No compass yet (the
+# ICM-20948 has an AK09916 magnetometer, but COMPASS_ENABLE=0 in rover.params).
+#
+# The GY-BNO08x IMU + its custom driver were removed. The ICM-20948 uses the
+# Invensensev2 driver (accel + gyro). If it isn't detected at boot ArduPilot
+# falls back to the empty substitute backend (GPS only) and ROS2 Nav2 handles
+# navigation.
+#
+# Copy into the ArduPilot source tree as
+# libraries/AP_HAL_Linux/hwdef/steve-pi/hwdef.dat and reserve
+# HAL_BOARD_SUBTYPE_LINUX_STEVE_PI (= 1032) in libraries/AP_HAL/AP_HAL_Boards.h
+# before building:  ./waf configure --board steve-pi --vehicle Rover && ./waf rover
+#
+# The binary is build/steve-pi/bin/ardurover.
+
+# Build natively on the Pi (aarch64), like the reference 'linux' board.
+env TOOLCHAIN native
+
+# ICM-20948 9-axis IMU on I2C6 — SDA=GPIO22 (pin 15), SCL=GPIO23 (pin 16), 0x68.
+# ROTATION_NONE is a placeholder; set the real mounting rotation after accel cal.
+IMU Invensensev2 I2C:6:0x68 ROTATION_ROLL_180_PITCH_270
+
+# AK09916 magnetometer on the ICM-20948's auxiliary I2C bus (probed via the INS
+# instance, so it auto-detects SPI vs I2C).
+COMPASS AK09916 I2C:6:0x0C false ROTATION_ROLL_180_PITCH_270
+define AP_COMPASS_PROBING_ENABLED 1
+
+# The rover has no barometer — allow ArduRover to init without one.
+define HAL_BARO_ALLOW_INIT_NO_BARO
+
+# Onboard dataflash .bin logs (filesystem logging needs this dir to exist).
+define HAL_BOARD_LOG_DIRECTORY "/home/pi/ardupilot/logs"
+
+# Do NOT auto-arm at boot (Rover AUTO_ARM_ONCE). STEVE is armed manually via the
+# bridge; auto-arm caused an arm/disarm race with the CPU failsafe.
+define AP_ROVER_AUTO_ARM_ONCE_ENABLED 0
+
+define CONFIG_HAL_BOARD_SUBTYPE HAL_BOARD_SUBTYPE_LINUX_STEVE_PI
