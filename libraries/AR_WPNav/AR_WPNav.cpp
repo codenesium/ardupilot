@@ -525,6 +525,13 @@ void AR_WPNav::update_steering_and_speed(const Location &current_loc, float dt)
         _desired_turn_rate_rads = _pos_control.get_desired_turn_rate_rads();
         _desired_lat_accel = _pos_control.get_desired_lat_accel();
     }
+    static uint32_t last_piv_dbg_ms = 0;
+    if (AP_HAL::millis() - last_piv_dbg_ms > 250) {
+        last_piv_dbg_ms = AP_HAL::millis();
+        GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "PDBG en=%d act=%d spd=%.3f hdg=%.1f turn=%.3f",
+            (int)_pivot.enabled(), (int)_pivot.active(), (double)_desired_speed_limited,
+            (double)(_desired_heading_cd * 0.01f), (double)_desired_turn_rate_rads);
+    }
 }
 
 // settor to allow vehicle code to provide turn related param values to this library (should be updated regularly)

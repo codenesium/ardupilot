@@ -24,6 +24,7 @@ public:
 
     // enable or disable pivot controller
     void enable(bool enable_pivot);
+    bool enabled() const { return _enabled; }
 
     // true if this controller is controlling vehicle
     bool active() const;

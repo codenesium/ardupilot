@@ -450,6 +450,12 @@ void Mode::navigate_to_waypoint()
     } else {
         // retrieve turn rate from waypoint controller
         float desired_turn_rate_rads = g2.wp_nav.get_turn_rate_rads();
+        static uint32_t last_nav_dbg_ms = 0;
+        if (AP_HAL::millis() - last_nav_dbg_ms > 250) {
+            last_nav_dbg_ms = AP_HAL::millis();
+            GCS_SEND_TEXT(MAV_SEVERITY_WARNING, "NAVDBG lim=%d spd=%.3f turn=%.3f",
+                (int)g2.avoid.limits_active(), (double)attitude_control.get_desired_speed(), (double)desired_turn_rate_rads);
+        }
 
         // if simple avoidance is active at very low speed do not attempt to turn
 #if AP_AVOIDANCE_ENABLED
