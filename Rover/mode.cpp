@@ -458,8 +458,10 @@ void Mode::navigate_to_waypoint()
         }
 
         // if simple avoidance is active at very low speed do not attempt to turn
+        // (skip for skid-steer rovers: zeroing turn rate deadlocks in-place pivots
+        // when stopped inside FENCE_MARGIN or near an obstacle)
 #if AP_AVOIDANCE_ENABLED
-        if (g2.avoid.limits_active() && (fabsf(attitude_control.get_desired_speed()) <= attitude_control.get_stop_speed())) {
+        if (!g2.motors.have_skid_steering() && g2.avoid.limits_active() && (fabsf(attitude_control.get_desired_speed()) <= attitude_control.get_stop_speed())) {
             desired_turn_rate_rads = 0.0f;
         }
 #endif
