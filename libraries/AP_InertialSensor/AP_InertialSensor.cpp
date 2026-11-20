@@ -1296,12 +1296,12 @@ AP_InertialSensor::detect_backends(void)
 
     if (_backend_count == 0) {
 
-        // no real INS backends avail, lets use an empty substitute to boot ok and get to mavlink
-        #if CONFIG_HAL_BOARD == HAL_BOARD_ESP32 || CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_LINUX_STEVE_PI
+        // no real INS backends avail -> fail loudly, never the NONE substitute
+        #if CONFIG_HAL_BOARD == HAL_BOARD_ESP32
         ADD_BACKEND(AP_InertialSensor_NONE::detect(*this, INS_NONE_SENSOR_A));
         #else
         DEV_PRINTF("INS: unable to initialise driver\n");
-        GCS_SEND_TEXT(MAV_SEVERITY_DEBUG, "INS: unable to initialise driver");
+        GCS_SEND_TEXT(MAV_SEVERITY_CRITICAL, "IMU issue: no INS detected (ICM-20948 not responding)");
         #if !AP_INERTIALSENSOR_ALLOW_NO_SENSORS
         AP_BoardConfig::config_error("INS: unable to initialise driver");
         #endif
