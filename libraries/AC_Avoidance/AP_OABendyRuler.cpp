@@ -103,9 +103,10 @@ bool AP_OABendyRuler::update(const Location& current_loc, const Location& destin
     // lookahead distance is adjusted dynamically based on avoidance results
     _current_lookahead = constrain_float(_current_lookahead, _lookahead * 0.5f, _lookahead);
 
-    // calculate lookahead dist and time for step1.  distance can be slightly longer than
-    // the distance to the destination to allow room to dodge after reaching the destination
-    const float lookahead_step1_dist = MIN(_current_lookahead, distance_to_dest + OA_BENDYRULER_LOOKAHEAD_PAST_DEST);
+    // calculate lookahead dist for step1 — clamp to distance_to_dest so we don't
+    // project 2 m past a corner waypoint into a fence behind it while keeping full
+    // OA_BR_LOOKAHEAD visibility on approach.
+    const float lookahead_step1_dist = MIN(_current_lookahead, distance_to_dest);
 
     // calculate lookahead dist for step2
     const float lookahead_step2_dist = _current_lookahead * OA_BENDYRULER_LOOKAHEAD_STEP2_RATIO;

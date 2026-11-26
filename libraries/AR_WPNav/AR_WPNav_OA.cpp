@@ -166,8 +166,14 @@ bool AR_WPNav_OA::set_desired_location(const Location& destination, Location nex
 // true if vehicle has reached desired location. defaults to true because this is normally used by missions and we do not want the mission to become stuck
 bool AR_WPNav_OA::reached_destination() const
 {
-    // object avoidance should always be deactivated before reaching final destination
+    // If the rover has physically entered WP_RADIUS of the real destination, let
+    // missions/guided advance instead of orbiting indefinitely when OA is active.
     if (_oa_active) {
+        Location current_loc;
+        if (AP::ahrs().get_location(current_loc) &&
+            current_loc.get_distance(_destination_oabak) <= _radius) {
+            return true;
+        }
         return false;
     }
 

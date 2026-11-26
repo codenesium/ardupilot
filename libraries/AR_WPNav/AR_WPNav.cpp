@@ -452,15 +452,21 @@ void AR_WPNav::advance_wp_target_along_track(const Location &current_loc, float 
     _pos_control.set_pos_vel_accel_target(target_pos_ptype, target_vel.xy(), target_accel.xy());
 
     // check if we've reached the waypoint
-    if (!_reached_destination && s_finished) {
-        // "fast" waypoints are complete once the intermediate point reaches the destination
-        if (_fast_waypoint) {
+    if (!_reached_destination) {
+        const bool near_wp = current_loc.get_distance(_destination) <= _radius;
+        if (near_wp && !_fast_waypoint) {
+            // Entering WP_RADIUS completes a stop/pivot waypoint immediately instead of
+            // stalling 30 s waiting for a short post-OA S-curve to finish at 5% speed.
             _reached_destination = true;
-        } else {
-            // regular waypoints also require the vehicle to be within the waypoint radius or past the "finish line"
-            const bool near_wp = current_loc.get_distance(_destination) <= _radius;
-            const bool past_wp = current_loc.past_interval_finish_line(_origin, _destination);
-            _reached_destination = near_wp || past_wp;
+        } else if (s_finished) {
+            // "fast" waypoints are complete once the intermediate point reaches the destination
+            if (_fast_waypoint) {
+                _reached_destination = true;
+            } else {
+                // regular waypoints also require the vehicle to be within the waypoint radius or past the "finish line"
+                const bool past_wp = current_loc.past_interval_finish_line(_origin, _destination);
+                _reached_destination = near_wp || past_wp;
+            }
         }
     }
 }
